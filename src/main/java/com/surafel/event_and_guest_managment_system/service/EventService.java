@@ -10,6 +10,7 @@ import com.surafel.event_and_guest_managment_system.exception.UnauthorizedAccess
 import com.surafel.event_and_guest_managment_system.repository.EventRepository;
 import com.surafel.event_and_guest_managment_system.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,7 +22,7 @@ public class EventService {
     private final UserRepository userRepository;
     private final VenueService venueService;
 
-
+    @PreAuthorize("hasAnyRole('ORGANIZER','ADMIN')")
     public EventResponse create(EventRequest request, String organizerEmail) {
         if (request.getEndDate().isBefore(request.getStartDate())) {
             throw new InvalidOperationException("End date must be after start date");
@@ -50,6 +51,7 @@ public class EventService {
         return eventRepository.findByOrganizerId(organizerId).stream().map(this::toResponse).toList();
     }
 
+    @PreAuthorize("hasAnyRole('ORGANIZER','ADMIN')")
     public EventResponse update(Long id, EventRequest request, String currentUserEmail) {
         Event event = findById(id);
         User currentUser = userRepository.findByEmail(currentUserEmail).orElseThrow();
@@ -64,7 +66,7 @@ public class EventService {
         return toResponse(eventRepository.save(event));
     }
 
-
+    @PreAuthorize("hasAnyRole('ORGANIZER','ADMIN')")
     public EventResponse updateStatus(Long id, EventStatus status, String currentUserEmail) {
         Event event = findById(id);
         User currentUser = userRepository.findByEmail(currentUserEmail).orElseThrow();
@@ -76,7 +78,7 @@ public class EventService {
         return toResponse(eventRepository.save(event));
     }
 
-
+    @PreAuthorize("hasAnyRole('ORGANIZER','ADMIN')")
     public void delete(Long id, String currentUserEmail) {
         Event event = findById(id);
         User currentUser = userRepository.findByEmail(currentUserEmail).orElseThrow();
